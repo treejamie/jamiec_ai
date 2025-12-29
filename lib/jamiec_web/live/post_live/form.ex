@@ -9,58 +9,47 @@ defmodule JamiecWeb.PostLive.Form do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="flex flex-col h-full">
-        <.form
-          for={@form}
-          id="post-form"
-          phx-change="validate"
-          phx-debounce="1500"
-          phx-submit="save"
-          class="flex flex-col flex-1 gap-4"
-        >
-          <div class="flex gap-4 items-end">
-            <div class="flex-1">
-              <.input
-                field={@form[:title]}
-                type="text"
-                label="Title"
-                placeholder="Post title"
-                required
-              />
-            </div>
+      <.form
+        for={@form}
+        id="post-form"
+        phx-change="validate"
+        phx-debounce="1500"
+        phx-submit="save"
+        class="flex flex-col h-full"
+      >
+        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4 flex flex-col flex-1">
+          <legend class="fieldset-legend text-lg">New Post</legend>
 
-            <div class="w-40">
-              <.input
-                field={@form[:status]}
-                type="select"
-                label="Status"
-                options={Enum.map(Post.statuses(), &{String.capitalize(to_string(&1)), &1})}
-              />
-            </div>
+          <.input field={@form[:title]} label="Title" placeholder="Post title" required />
 
-            <button type="submit" class="btn btn-primary" phx-disable-with="Saving...">
-              Save
-            </button>
-          </div>
+          <.input
+            field={@form[:status]}
+            type="select"
+            label="Status"
+            options={Enum.map(Post.statuses(), &{String.capitalize(to_string(&1)), &1})}
+          />
 
           <.input
             field={@form[:description]}
-            type="text"
             label="Description"
             placeholder="Brief description"
           />
 
-          <div class="flex-1 flex flex-col">
-            <.input
-              field={@form[:markdown_body]}
-              type="textarea"
-              label="Content (Markdown)"
-              placeholder="Write your post in markdown..."
-              class="flex-1 font-mono min-h-96"
-            />
+          <.input
+            field={@form[:markdown_body]}
+            type="textarea"
+            label="Content (Markdown)"
+            class="textarea w-full flex-1 font-mono min-h-96"
+            placeholder="Write your post in markdown..."
+          />
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary" phx-disable-with="Saving...">
+              Save Post
+            </button>
           </div>
-        </.form>
-      </div>
+        </fieldset>
+      </.form>
     </Layouts.app>
     """
   end
