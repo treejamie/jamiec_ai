@@ -122,4 +122,78 @@ defmodule Jamiec.ContentTest do
       assert %Ecto.Changeset{} = Content.change_post(post)
     end
   end
+
+  describe "markdown to html conversion" do
+    test "converts markdown_body to html_body on create" do
+      attrs = %{
+        title: "Markdown Post",
+        markdown_body: "# Hello World\n\nThis is a paragraph."
+      }
+
+      assert {:ok, %Post{} = post} = Content.create_post(attrs)
+      assert post.html_body =~ "<h1>"
+      assert post.html_body =~ "Hello World"
+      assert post.html_body =~ "<p>"
+      assert post.html_body =~ "This is a paragraph."
+    end
+
+    test "converts markdown_body to html_body on update" do
+      post = post_fixture(%{markdown_body: "# Original"})
+
+      assert {:ok, %Post{} = updated_post} =
+               Content.update_post(post, %{markdown_body: "## Updated Heading"})
+
+      assert updated_post.html_body =~ "<h2>"
+      assert updated_post.html_body =~ "Updated Heading"
+    end
+
+    test "handles code blocks with syntax highlighting" do
+      attrs = %{
+        title: "Code Post",
+        markdown_body: """
+        ```elixir
+        def hello do
+          :world
+        end
+        ```
+        """
+      }
+
+      assert {:ok, %Post{} = post} = Content.create_post(attrs)
+      assert post.html_body =~ "<pre"
+      assert post.html_body =~ "def"
+      assert post.html_body =~ "hello"
+    end
+
+    test "does not change html_body when markdown_body is not updated" do
+      post = post_fixture(%{markdown_body: "# Original", html_body: nil})
+      original_html = post.html_body
+
+      assert {:ok, %Post{} = updated_post} =
+               Content.update_post(post, %{title: "New Title"})
+
+      assert updated_post.html_body == original_html
+    end
+
+    test "handles GitHub flavored markdown features" do
+      attrs = %{
+        title: "GFM Post",
+        markdown_body: """
+        - [x] Task 1
+        - [ ] Task 2
+
+        | Column 1 | Column 2 |
+        |----------|----------|
+        | A        | B        |
+
+        ~~strikethrough~~
+        """
+      }
+
+      assert {:ok, %Post{} = post} = Content.create_post(attrs)
+      assert post.html_body =~ "<table>"
+      assert post.html_body =~ "<del>"
+      assert post.html_body =~ "strikethrough"
+    end
+  end
 end
