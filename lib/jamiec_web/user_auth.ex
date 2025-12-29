@@ -1,4 +1,5 @@
 defmodule JamiecWeb.UserAuth do
+  @moduledoc false
   use JamiecWeb, :verified_routes
 
   import Plug.Conn

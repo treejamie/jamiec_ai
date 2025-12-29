@@ -1,4 +1,5 @@
 defmodule Jamiec.Accounts.UserToken do
+  @moduledoc false
   use Ecto.Schema
   import Ecto.Query
   alias Jamiec.Accounts.UserToken
