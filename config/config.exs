@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :jamiec, :scopes,
+  user: [
+    default: true,
+    module: Jamiec.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :users,
+    test_data_fixture: Jamiec.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :jamiec,
   ecto_repos: [Jamiec.Repo],
   generators: [timestamp_type: :utc_datetime]

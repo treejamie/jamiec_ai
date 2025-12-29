@@ -1,6 +1,8 @@
 defmodule JamiecWeb.Router do
   use JamiecWeb, :router
 
+  import JamiecWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +10,7 @@ defmodule JamiecWeb.Router do
     plug :put_root_layout, html: {JamiecWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :api do
@@ -40,5 +43,32 @@ defmodule JamiecWeb.Router do
       live_dashboard "/dashboard", metrics: JamiecWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
+  end
+
+  ## Authentication routes
+
+  scope "/office", JamiecWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{JamiecWeb.UserAuth, :require_authenticated}] do
+      live "/settings", UserLive.Settings, :edit
+      live "/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
+
+    post "/update-password", UserSessionController, :update_password
+  end
+
+  scope "/office", JamiecWeb do
+    pipe_through [:browser]
+
+    live_session :current_user,
+      on_mount: [{JamiecWeb.UserAuth, :mount_current_scope}] do
+      live "/log-in", UserLive.Login, :new
+      live "/log-in/:token", UserLive.Confirmation, :new
+    end
+
+    post "/log-in", UserSessionController, :create
+    delete "/log-out", UserSessionController, :delete
   end
 end
