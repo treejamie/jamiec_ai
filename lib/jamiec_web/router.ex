@@ -47,28 +47,28 @@ defmodule JamiecWeb.Router do
 
   ## Authentication routes
 
-  scope "/", JamiecWeb do
+  scope "/office", JamiecWeb do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
       on_mount: [{JamiecWeb.UserAuth, :require_authenticated}] do
-      live "/users/settings", UserLive.Settings, :edit
-      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+      live "/settings", UserLive.Settings, :edit
+      live "/settings/confirm-email/:token", UserLive.Settings, :confirm_email
     end
 
-    post "/users/update-password", UserSessionController, :update_password
+    post "/update-password", UserSessionController, :update_password
   end
 
-  scope "/", JamiecWeb do
+  scope "/office", JamiecWeb do
     pipe_through [:browser]
 
     live_session :current_user,
       on_mount: [{JamiecWeb.UserAuth, :mount_current_scope}] do
-      live "/users/log-in", UserLive.Login, :new
-      live "/users/log-in/:token", UserLive.Confirmation, :new
+      live "/log-in", UserLive.Login, :new
+      live "/log-in/:token", UserLive.Confirmation, :new
     end
 
-    post "/users/log-in", UserSessionController, :create
-    delete "/users/log-out", UserSessionController, :delete
+    post "/log-in", UserSessionController, :create
+    delete "/log-out", UserSessionController, :delete
   end
 end
