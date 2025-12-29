@@ -4,7 +4,10 @@ This is a personal website / blog written using the Phoenix web framework.
 ## Project guidelines
 
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
-- Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
+- Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps.
+- When doing work ensure that the `mix precommit` command runs successfully before moving onto the next step or declaring work complete.
+- After each step or task, or when all tasks have completed - always commit your code with a conventional commit message.
+- you must not commit code unless `mix precommit` runs successfully.
 
 ### Phoenix v1.8 guidelines
 
