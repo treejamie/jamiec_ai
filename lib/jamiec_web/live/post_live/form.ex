@@ -10,13 +10,7 @@ defmodule JamiecWeb.PostLive.Form do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="flex flex-col h-full">
-        <.form
-          for={@form}
-          id="post-form"
-          phx-change="validate"
-          phx-submit="save"
-          class="flex flex-col flex-1 gap-4"
-        >
+        <.form for={@form} id="post-form" phx-submit="save" class="flex flex-col flex-1 gap-4">
           <div class="flex gap-4 items-end">
             <div class="flex-1">
               <.input
@@ -71,15 +65,6 @@ defmodule JamiecWeb.PostLive.Form do
   end
 
   @impl true
-  def handle_event("validate", %{"post" => post_params}, socket) do
-    changeset =
-      %Post{}
-      |> Content.change_post(post_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign(socket, form: to_form(changeset))}
-  end
-
   def handle_event("save", %{"post" => post_params}, socket) do
     case Content.create_post(post_params) do
       {:ok, _post} ->
