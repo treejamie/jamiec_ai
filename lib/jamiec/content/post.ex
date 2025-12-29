@@ -23,5 +23,29 @@ defmodule Jamiec.Content.Post do
     |> cast(attrs, [:title, :description, :markdown_body, :html_body, :status])
     |> validate_required([:title])
     |> validate_inclusion(:status, @statuses)
+    |> convert_markdown_to_html()
+  end
+
+  defp convert_markdown_to_html(changeset) do
+    case get_change(changeset, :markdown_body) do
+      nil ->
+        changeset
+
+      markdown ->
+        html =
+          MDEx.to_html!(markdown,
+            extension: [
+              strikethrough: true,
+              tagfilter: true,
+              table: true,
+              autolink: true,
+              tasklist: true
+            ],
+            parse: [smart: true],
+            render: [unsafe_: true]
+          )
+
+        put_change(changeset, :html_body, html)
+    end
   end
 end
