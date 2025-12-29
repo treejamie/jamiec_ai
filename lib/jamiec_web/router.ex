@@ -20,7 +20,9 @@ defmodule JamiecWeb.Router do
   scope "/", JamiecWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live_session :public, on_mount: [{JamiecWeb.UserAuth, :mount_current_scope}] do
+      live "/", HomeLive, :index
+    end
   end
 
   # Other scopes may use custom stacks.
