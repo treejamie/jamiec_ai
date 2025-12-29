@@ -7,10 +7,9 @@ This is a personal website / blog written using the Phoenix web framework.
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps.
 - When doing work ensure that the `mix precommit` command runs successfully before moving onto the next step or declaring work complete.
 - After each step or task, or when all tasks have completed - always commit your code with a conventional commit message.
-- you must not commit code unless `mix precommit` runs successfully.
-
+- you must not commit code unless `mix precommit` runs successfully.  
 - when working against a github issue and your work is completed, ask to open a pull request. Use a conventional commit message as the title and add a short description as the body. 
-- when creating pull requests, if there was a github issue for the work, always use the `--issue` flag to link the pull request to the issue.
+- when creating pull requests, if there was a github issue for the work, always ensure the description of the pull request uses the "closes #<issue_number>" syntax.
 
 ### Phoenix v1.8 guidelines
 
