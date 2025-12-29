@@ -56,6 +56,7 @@ defmodule JamiecWeb.Router do
       on_mount: [{JamiecWeb.UserAuth, :require_authenticated}] do
       live "/settings", UserLive.Settings, :edit
       live "/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+      live "/posts/new", PostLive.Form, :new
     end
 
     post "/update-password", UserSessionController, :update_password
