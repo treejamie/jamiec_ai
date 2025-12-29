@@ -9,6 +9,9 @@ This is a personal website / blog written using the Phoenix web framework.
 - After each step or task, or when all tasks have completed - always commit your code with a conventional commit message.
 - you must not commit code unless `mix precommit` runs successfully.
 
+- when working against a github issue and your work is completed, ask to open a pull request. Use a conventional commit message as the title and add a short description as the body. 
+- when creating pull requests, if there was a github issue for the work, always use the `--issue` flag to link the pull request to the issue.
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
