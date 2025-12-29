@@ -17,7 +17,7 @@ defmodule JamiecWeb.PostLive.Form do
         phx-submit="save"
         class="flex flex-col h-full"
       >
-        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4 flex flex-col flex-1 w-1/2">
+        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4 flex flex-col flex-1 w-full">
           <legend class="fieldset-legend text-lg">New Post</legend>
 
           <.input field={@form[:title]} label="Title" placeholder="Post title" required />
