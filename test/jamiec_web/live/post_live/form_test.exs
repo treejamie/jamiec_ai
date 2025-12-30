@@ -30,13 +30,13 @@ defmodule JamiecWeb.PostLive.FormTest do
       assert %{"error" => "You must log in to access this page."} = flash
     end
 
-    test "creates a post and stays on page with flash message", %{conn: conn} do
+    test "creates a post when form is submitted with valid data", %{conn: conn} do
       user = user_fixture()
       conn = log_in_user(conn, user)
 
       {:ok, lv, _html} = live(conn, ~p"/office/posts/new")
 
-      html =
+      {:ok, _lv, html} =
         lv
         |> form("#post-form", %{
           "post" => %{
@@ -49,7 +49,7 @@ defmodule JamiecWeb.PostLive.FormTest do
         |> render_submit()
         |> follow_redirect(conn, ~p"/office/posts")
 
-      assert html =~ "Post saved"
+      assert html =~ "Post created successfully"
 
       # Verify post was created
       [post] = Content.list_posts(nil)
