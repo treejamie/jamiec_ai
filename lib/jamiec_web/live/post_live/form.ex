@@ -75,8 +75,7 @@ defmodule JamiecWeb.PostLive.Form do
       {:ok, _post} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Post created successfully.")
-         |> push_navigate(to: ~p"/")}
+         |> put_flash(:info, "Post saved.")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
