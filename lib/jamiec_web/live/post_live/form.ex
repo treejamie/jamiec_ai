@@ -18,7 +18,7 @@ defmodule JamiecWeb.PostLive.Form do
         class="flex flex-col h-full"
       >
         <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4 flex flex-col flex-1 w-full">
-          <legend class="fieldset-legend text-lg">New Post</legend>
+          <legend class="fieldset-legend text-lg">{@page_title}</legend>
 
           <.input field={@form[:title]} label="Title" placeholder="Post title" required />
 
@@ -56,14 +56,38 @@ defmodule JamiecWeb.PostLive.Form do
 
   @impl true
   def mount(_params, _session, socket) do
-    changeset = Content.change_post(%Post{})
-    {:ok, assign(socket, form: to_form(changeset))}
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :new, _params) do
+    post = %Post{}
+    changeset = Content.change_post(post)
+
+    socket
+    |> assign(:page_title, "New Post")
+    |> assign(:post, post)
+    |> assign(:form, to_form(changeset))
+  end
+
+  defp apply_action(socket, :edit, %{"id" => id}) do
+    post = Content.get_post!(id)
+    changeset = Content.change_post(post)
+
+    socket
+    |> assign(:page_title, "Edit Post")
+    |> assign(:post, post)
+    |> assign(:form, to_form(changeset))
   end
 
   @impl true
   def handle_event("validate", %{"post" => post_params}, socket) do
     changeset =
-      %Post{}
+      socket.assigns.post
       |> Content.change_post(post_params)
       |> Map.put(:action, :validate)
 
@@ -71,12 +95,29 @@ defmodule JamiecWeb.PostLive.Form do
   end
 
   def handle_event("save", %{"post" => post_params}, socket) do
+    save_post(socket, socket.assigns.live_action, post_params)
+  end
+
+  defp save_post(socket, :new, post_params) do
     case Content.create_post(post_params) do
       {:ok, _post} ->
         {:noreply,
          socket
          |> put_flash(:info, "Post created successfully.")
-         |> push_navigate(to: ~p"/")}
+         |> push_navigate(to: ~p"/office/posts")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
+    end
+  end
+
+  defp save_post(socket, :edit, post_params) do
+    case Content.update_post(socket.assigns.post, post_params) do
+      {:ok, _post} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Post updated successfully.")
+         |> push_navigate(to: ~p"/office/posts")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
