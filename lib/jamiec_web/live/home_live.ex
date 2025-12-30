@@ -11,7 +11,9 @@ defmodule JamiecWeb.HomeLive do
       <div class="mx-auto max-w-3xl">
         <div id="posts" class="space-y-8">
           <div :for={post <- @posts} id={"post-#{post.id}"} class="border-b border-gray-200 pb-6">
-            <h2 class="text-2xl font-bold">{post.title}</h2>
+            <.link navigate={~p"/posts/#{post.id}"}>
+              <h2 class="text-2xl font-bold">{post.title}</h2>
+            </.link>
             <p :if={post.description} class="mt-2 text-gray-600">{post.description}</p>
           </div>
           <div :if={@posts == []} class="text-gray-500 text-center py-8">
