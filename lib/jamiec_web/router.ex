@@ -22,6 +22,7 @@ defmodule JamiecWeb.Router do
 
     live_session :public, on_mount: [{JamiecWeb.UserAuth, :mount_current_scope}] do
       live "/", HomeLive, :index
+      live "/posts/:id", PostLive.Show, :show
     end
   end
 
