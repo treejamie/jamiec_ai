@@ -26,10 +26,164 @@ import {hooks as colocatedHooks} from "phoenix-colocated/jamiec"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+// TOC scroll sync hook - highlights current section, scrolls TOC, and fixes TOC on scroll
+const TocScrollSync = {
+  mounted() {
+    this.setupTocFixing()
+    this.observeHeadings()
+  },
+
+  setupTocFixing() {
+    const tocNav = this.el.querySelector('[data-toc-nav]')
+    if (!tocNav) return
+
+    // Create a sentinel element to detect when TOC should become fixed
+    this.sentinel = document.createElement('div')
+    this.sentinel.style.height = '1px'
+    this.sentinel.style.width = '100%'
+    tocNav.parentNode.insertBefore(this.sentinel, tocNav)
+
+    // Store original position info
+    this.tocNav = tocNav
+    this.isFixed = false
+    this.isPastFooter = false
+
+    // Use IntersectionObserver to detect when sentinel leaves viewport
+    this.fixObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+          // Sentinel scrolled above viewport - fix the TOC (if not past footer)
+          if (!this.isPastFooter) {
+            this.fixToc()
+          }
+        } else if (entry.isIntersecting) {
+          // Sentinel visible - unfix the TOC
+          this.unfixToc()
+        }
+      })
+    }, { threshold: 0 })
+
+    this.fixObserver.observe(this.sentinel)
+
+    // Observe footer to unfix TOC before overlap
+    const footer = document.querySelector('footer')
+    if (footer) {
+      this.footerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Footer is visible - unfix TOC to prevent overlap
+            this.isPastFooter = true
+            this.unfixToc()
+          } else {
+            this.isPastFooter = false
+            // Re-fix if sentinel is above viewport
+            const sentinelRect = this.sentinel.getBoundingClientRect()
+            if (sentinelRect.top < 0) {
+              this.fixToc()
+            }
+          }
+        })
+      }, { threshold: 0, rootMargin: '0px 0px 0px 0px' })
+
+      this.footerObserver.observe(footer)
+    }
+  },
+
+  fixToc() {
+    if (this.isFixed || this.isPastFooter) return
+    this.isFixed = true
+    this.tocNav.classList.add('fixed', 'top-8')
+    this.tocNav.classList.remove('relative')
+  },
+
+  unfixToc() {
+    if (!this.isFixed) return
+    this.isFixed = false
+    this.tocNav.classList.remove('fixed', 'top-8')
+    this.tocNav.classList.add('relative')
+  },
+
+  observeHeadings() {
+    const contentEl = this.el.querySelector('[data-toc-content]')
+    const tocNav = this.el.querySelector('[data-toc-nav]')
+
+    if (!contentEl || !tocNav) return
+
+    const headings = contentEl.querySelectorAll('h2, h3, h4, h5, h6')
+    if (headings.length === 0) return
+
+    // Track which heading is currently active
+    let activeId = null
+
+    const observer = new IntersectionObserver((entries) => {
+      // Find the topmost visible heading
+      const visibleEntries = entries.filter(e => e.isIntersecting)
+
+      if (visibleEntries.length > 0) {
+        // Sort by position and take the topmost
+        visibleEntries.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        const topEntry = visibleEntries[0]
+        const id = topEntry.target.querySelector('a[id]')?.id ||
+                   topEntry.target.id ||
+                   this.slugify(topEntry.target.textContent)
+
+        if (id !== activeId) {
+          activeId = id
+          this.highlightTocItem(tocNav, id)
+        }
+      }
+    }, {
+      rootMargin: '-10% 0px -70% 0px',
+      threshold: 0
+    })
+
+    headings.forEach(heading => observer.observe(heading))
+    this.observer = observer
+  },
+
+  highlightTocItem(tocNav, id) {
+    // Remove all active states
+    tocNav.querySelectorAll('a').forEach(link => {
+      link.classList.remove('font-bold', 'opacity-100')
+      link.classList.add('opacity-70')
+    })
+
+    // Add active state to matching link
+    const activeLink = tocNav.querySelector(`a[href="#${id}"]`)
+    if (activeLink) {
+      activeLink.classList.remove('opacity-70')
+      activeLink.classList.add('font-bold', 'opacity-100')
+    }
+  },
+
+  slugify(text) {
+    return text.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .trim('-')
+  },
+
+  destroyed() {
+    if (this.observer) {
+      this.observer.disconnect()
+    }
+    if (this.fixObserver) {
+      this.fixObserver.disconnect()
+    }
+    if (this.footerObserver) {
+      this.footerObserver.disconnect()
+    }
+    if (this.sentinel) {
+      this.sentinel.remove()
+    }
+  }
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, TocScrollSync},
 })
 
 // Show progress bar on live navigation and form submits
