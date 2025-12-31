@@ -26,7 +26,10 @@ defmodule JamiecWeb.PostLive.ShowTest do
 
     test "extracts single h2 heading" do
       html = mdex_heading(2, "intro", "Introduction")
-      assert Show.build_toc(html) == [%{level: 2, id: "intro", text: "Introduction", children: []}]
+
+      assert Show.build_toc(html) == [
+               %{level: 2, id: "intro", text: "Introduction", children: []}
+             ]
     end
 
     test "extracts multiple h2 headings as flat list" do
