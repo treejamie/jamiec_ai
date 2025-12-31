@@ -39,7 +39,8 @@ defmodule Jamiec.Content.Post do
               tagfilter: true,
               table: true,
               autolink: true,
-              tasklist: true
+              tasklist: true,
+              header_ids: ""
             ],
             parse: [smart: true],
             render: [unsafe_: true]
