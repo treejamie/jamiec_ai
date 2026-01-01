@@ -47,6 +47,7 @@ const TocScrollSync = {
     // Store original position info
     this.tocNav = tocNav
     this.isFixed = false
+    this.isAbsolute = false
     this.isPastFooter = false
 
     // Use IntersectionObserver to detect when sentinel leaves viewport
@@ -72,9 +73,9 @@ const TocScrollSync = {
       this.footerObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            // Footer is visible - unfix TOC to prevent overlap
+            // Footer is visible - anchor TOC to bottom of container for smooth scroll-away
             this.isPastFooter = true
-            this.unfixToc()
+            this.absoluteToc()
           } else {
             this.isPastFooter = false
             // Re-fix if sentinel is above viewport
@@ -93,15 +94,39 @@ const TocScrollSync = {
   fixToc() {
     if (this.isFixed || this.isPastFooter) return
     this.isFixed = true
+    this.isAbsolute = false
+    this.tocNav.classList.remove('relative', 'absolute', 'bottom-0')
     this.tocNav.classList.add('fixed', 'top-8')
-    this.tocNav.classList.remove('relative')
+    // Clear any inline styles from absoluteToc()
+    this.tocNav.style.top = ''
+    this.tocNav.style.bottom = ''
   },
 
   unfixToc() {
-    if (!this.isFixed) return
+    if (!this.isFixed && !this.isAbsolute) return
     this.isFixed = false
-    this.tocNav.classList.remove('fixed', 'top-8')
+    this.isAbsolute = false
+    this.tocNav.classList.remove('fixed', 'top-8', 'absolute', 'bottom-0')
     this.tocNav.classList.add('relative')
+    // Clear any inline styles from absoluteToc()
+    this.tocNav.style.top = ''
+    this.tocNav.style.bottom = ''
+  },
+
+  absoluteToc() {
+    if (this.isAbsolute) return
+
+    // Calculate current position relative to container to avoid jump
+    const tocRect = this.tocNav.getBoundingClientRect()
+    const containerRect = this.tocNav.parentElement.getBoundingClientRect()
+    const topOffset = tocRect.top - containerRect.top
+
+    this.isFixed = false
+    this.isAbsolute = true
+    this.tocNav.classList.remove('fixed', 'top-8', 'relative')
+    this.tocNav.classList.add('absolute')
+    this.tocNav.style.top = `${topOffset}px`
+    this.tocNav.style.bottom = 'auto'
   },
 
   observeHeadings() {

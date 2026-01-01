@@ -14,7 +14,7 @@ defmodule JamiecWeb.PostLive.Show do
       style="background: linear-gradient(180deg, #FF0046 0%, #FF7802 100%);"
     >
       <%!-- Left column (desktop only) --%>
-      <div class="hidden lg:block w-1/2">
+      <div class="hidden lg:block w-1/2 relative">
         <%!-- Title/Description - scrolls with page --%>
         <div class="text-white p-8 lg:p-12">
           <h1 class="font-semibold" style="font-size: 64px; line-height: 64px;">
