@@ -97,6 +97,9 @@ const TocScrollSync = {
     this.isAbsolute = false
     this.tocNav.classList.remove('relative', 'absolute', 'bottom-0')
     this.tocNav.classList.add('fixed', 'top-8')
+    // Clear any inline styles from absoluteToc()
+    this.tocNav.style.top = ''
+    this.tocNav.style.bottom = ''
   },
 
   unfixToc() {
@@ -105,6 +108,9 @@ const TocScrollSync = {
     this.isAbsolute = false
     this.tocNav.classList.remove('fixed', 'top-8', 'absolute', 'bottom-0')
     this.tocNav.classList.add('relative')
+    // Clear any inline styles from absoluteToc()
+    this.tocNav.style.top = ''
+    this.tocNav.style.bottom = ''
   },
 
   absoluteToc() {
