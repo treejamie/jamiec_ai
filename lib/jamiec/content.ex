@@ -7,6 +7,7 @@ defmodule Jamiec.Content do
   alias Jamiec.Repo
   alias Jamiec.Accounts.Scope
   alias Jamiec.Content.Post
+  alias Jamiec.Content.Tag
 
   @doc """
   Returns a list of posts based on the scope.
@@ -66,5 +67,35 @@ defmodule Jamiec.Content do
   """
   def change_post(%Post{} = post, attrs \\ %{}) do
     Post.changeset(post, attrs)
+  end
+
+  @doc """
+  Returns all tags.
+  """
+  def list_tags do
+    Repo.all(Tag)
+  end
+
+  @doc """
+  Gets a single tag.
+
+  Raises `Ecto.NoResultsError` if the Tag does not exist.
+  """
+  def get_tag!(id), do: Repo.get!(Tag, id)
+
+  @doc """
+  Creates a tag.
+  """
+  def create_tag(attrs \\ %{}) do
+    %Tag{}
+    |> Tag.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a tag.
+  """
+  def delete_tag(%Tag{} = tag) do
+    Repo.delete(tag)
   end
 end
