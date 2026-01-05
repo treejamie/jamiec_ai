@@ -23,4 +23,19 @@ defmodule Jamiec.ContentFixtures do
 
     post
   end
+
+  def valid_tag_attributes(attrs \\ %{}) do
+    Enum.into(attrs, %{
+      tag: "Tag #{System.unique_integer([:positive])}"
+    })
+  end
+
+  def tag_fixture(attrs \\ %{}) do
+    {:ok, tag} =
+      attrs
+      |> valid_tag_attributes()
+      |> Content.create_tag()
+
+    tag
+  end
 end
