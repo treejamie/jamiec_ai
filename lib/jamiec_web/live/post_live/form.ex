@@ -4,6 +4,7 @@ defmodule JamiecWeb.PostLive.Form do
 
   alias Jamiec.Content
   alias Jamiec.Content.Post
+  alias JamiecWeb.Live.Components.TagInput
 
   @impl true
   def render(assigns) do
@@ -33,6 +34,12 @@ defmodule JamiecWeb.PostLive.Form do
             field={@form[:description]}
             label="Description"
             placeholder="Brief description"
+          />
+
+          <.live_component
+            module={TagInput}
+            id="tag-input"
+            selected_tags={@selected_tags}
           />
 
           <.input
@@ -71,16 +78,18 @@ defmodule JamiecWeb.PostLive.Form do
     socket
     |> assign(:page_title, "New Post")
     |> assign(:post, post)
+    |> assign(:selected_tags, [])
     |> assign(:form, to_form(changeset))
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    post = Content.get_post!(id)
+    post = Content.get_post!(id) |> Jamiec.Repo.preload(:tags)
     changeset = Content.change_post(post)
 
     socket
     |> assign(:page_title, "Edit Post")
     |> assign(:post, post)
+    |> assign(:selected_tags, post.tags)
     |> assign(:form, to_form(changeset))
   end
 
@@ -98,8 +107,15 @@ defmodule JamiecWeb.PostLive.Form do
     save_post(socket, socket.assigns.live_action, post_params)
   end
 
+  @impl true
+  def handle_info({:update_tags, tags}, socket) do
+    {:noreply, assign(socket, :selected_tags, tags)}
+  end
+
   defp save_post(socket, :new, post_params) do
-    case Content.create_post(post_params) do
+    tag_ids = parse_tag_ids(post_params)
+
+    case Content.create_post_with_tags(post_params, tag_ids) do
       {:ok, _post} ->
         {:noreply,
          socket
@@ -112,7 +128,9 @@ defmodule JamiecWeb.PostLive.Form do
   end
 
   defp save_post(socket, :edit, post_params) do
-    case Content.update_post(socket.assigns.post, post_params) do
+    tag_ids = parse_tag_ids(post_params)
+
+    case Content.update_post_with_tags(socket.assigns.post, post_params, tag_ids) do
       {:ok, _post} ->
         {:noreply,
          socket
@@ -123,4 +141,12 @@ defmodule JamiecWeb.PostLive.Form do
         {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
+
+  defp parse_tag_ids(%{"tag_ids" => tag_ids}) when is_list(tag_ids) do
+    tag_ids
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_integer/1)
+  end
+
+  defp parse_tag_ids(_), do: []
 end

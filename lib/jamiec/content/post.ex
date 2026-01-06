@@ -14,7 +14,7 @@ defmodule Jamiec.Content.Post do
     field :html_body, :string
     field :status, Ecto.Enum, values: @statuses, default: :draft
 
-    many_to_many :tags, Tag, join_through: "posts_tags"
+    many_to_many :tags, Tag, join_through: "posts_tags", on_replace: :delete
 
     timestamps(type: :utc_datetime)
   end
