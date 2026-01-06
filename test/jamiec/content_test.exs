@@ -294,4 +294,130 @@ defmodule Jamiec.ContentTest do
       assert post_with_tags.tags == []
     end
   end
+
+  describe "search_tags/1" do
+    test "returns tags matching the query" do
+      tag_fixture(%{tag: "Elixir"})
+      tag_fixture(%{tag: "Elixir Phoenix"})
+      tag_fixture(%{tag: "Ruby"})
+
+      results = Content.search_tags("elix")
+
+      assert length(results) == 2
+      assert Enum.all?(results, fn t -> String.contains?(String.downcase(t.tag), "elix") end)
+    end
+
+    test "returns empty list for empty query" do
+      tag_fixture(%{tag: "Elixir"})
+
+      assert Content.search_tags("") == []
+      assert Content.search_tags(nil) == []
+    end
+
+    test "search is case-insensitive" do
+      tag_fixture(%{tag: "Elixir"})
+
+      assert length(Content.search_tags("ELIXIR")) == 1
+      assert length(Content.search_tags("elixir")) == 1
+    end
+
+    test "limits results to 10" do
+      for i <- 1..15, do: tag_fixture(%{tag: "Tag #{i}"})
+
+      results = Content.search_tags("Tag")
+
+      assert length(results) == 10
+    end
+  end
+
+  describe "get_or_create_tag/1" do
+    test "returns existing tag if found" do
+      existing = tag_fixture(%{tag: "Elixir"})
+
+      {:ok, tag} = Content.get_or_create_tag("Elixir")
+
+      assert tag.id == existing.id
+    end
+
+    test "creates new tag if not found" do
+      {:ok, tag} = Content.get_or_create_tag("NewTag")
+
+      assert tag.tag == "NewTag"
+      assert tag.slug == "newtag"
+    end
+
+    test "trims whitespace from name" do
+      {:ok, tag} = Content.get_or_create_tag("  Elixir  ")
+
+      assert tag.tag == "Elixir"
+    end
+  end
+
+  describe "create_post_with_tags/2" do
+    test "creates post with associated tags" do
+      tag1 = tag_fixture(%{tag: "Elixir"})
+      tag2 = tag_fixture(%{tag: "Phoenix"})
+
+      {:ok, post} = Content.create_post_with_tags(
+        %{title: "My Post"},
+        [tag1.id, tag2.id]
+      )
+
+      post_with_tags = post |> Jamiec.Repo.preload(:tags)
+
+      assert length(post_with_tags.tags) == 2
+      assert tag1 in post_with_tags.tags
+      assert tag2 in post_with_tags.tags
+    end
+
+    test "creates post with empty tags" do
+      {:ok, post} = Content.create_post_with_tags(%{title: "No Tags"}, [])
+
+      post_with_tags = post |> Jamiec.Repo.preload(:tags)
+
+      assert post_with_tags.tags == []
+    end
+  end
+
+  describe "update_post_with_tags/3" do
+    test "updates post and replaces tags" do
+      tag1 = tag_fixture(%{tag: "Elixir"})
+      tag2 = tag_fixture(%{tag: "Phoenix"})
+      tag3 = tag_fixture(%{tag: "OTP"})
+
+      {:ok, post} = Content.create_post_with_tags(
+        %{title: "Original"},
+        [tag1.id]
+      )
+
+      {:ok, updated} = Content.update_post_with_tags(
+        post,
+        %{title: "Updated"},
+        [tag2.id, tag3.id]
+      )
+
+      updated_with_tags = updated |> Jamiec.Repo.preload(:tags)
+
+      assert updated.title == "Updated"
+      assert length(updated_with_tags.tags) == 2
+      assert tag2 in updated_with_tags.tags
+      assert tag3 in updated_with_tags.tags
+      refute tag1 in updated_with_tags.tags
+    end
+
+    test "can remove all tags" do
+      tag = tag_fixture(%{tag: "Elixir"})
+
+      {:ok, post} = Content.create_post_with_tags(
+        %{title: "Has Tags"},
+        [tag.id]
+      )
+
+      {:ok, updated} = Content.update_post_with_tags(post, %{}, [])
+
+      updated_with_tags = updated |> Jamiec.Repo.preload(:tags)
+
+      assert updated_with_tags.tags == []
+    end
+  end
 end

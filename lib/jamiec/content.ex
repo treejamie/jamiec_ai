@@ -98,4 +98,57 @@ defmodule Jamiec.Content do
   def delete_tag(%Tag{} = tag) do
     Repo.delete(tag)
   end
+
+  @doc """
+  Searches for tags matching a query string.
+  Returns tags where the tag name contains the query (case-insensitive).
+  """
+  def search_tags(query) when is_binary(query) and byte_size(query) > 0 do
+    search_term = "%#{query}%"
+
+    Tag
+    |> where([t], ilike(t.tag, ^search_term))
+    |> order_by([t], asc: t.tag)
+    |> limit(10)
+    |> Repo.all()
+  end
+
+  def search_tags(_), do: []
+
+  @doc """
+  Gets an existing tag by name or creates a new one.
+  """
+  def get_or_create_tag(name) when is_binary(name) do
+    name = String.trim(name)
+
+    case Repo.get_by(Tag, tag: name) do
+      nil -> create_tag(%{tag: name})
+      tag -> {:ok, tag}
+    end
+  end
+
+  @doc """
+  Updates a post with associated tags.
+  """
+  def update_post_with_tags(%Post{} = post, attrs, tag_ids) when is_list(tag_ids) do
+    tags = Repo.all(from t in Tag, where: t.id in ^tag_ids)
+
+    post
+    |> Repo.preload(:tags)
+    |> Post.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:tags, tags)
+    |> Repo.update()
+  end
+
+  @doc """
+  Creates a post with associated tags.
+  """
+  def create_post_with_tags(attrs, tag_ids) when is_list(tag_ids) do
+    tags = Repo.all(from t in Tag, where: t.id in ^tag_ids)
+
+    %Post{}
+    |> Post.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:tags, tags)
+    |> Repo.insert()
+  end
 end
