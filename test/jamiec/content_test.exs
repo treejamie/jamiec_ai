@@ -3,6 +3,7 @@ defmodule Jamiec.ContentTest do
 
   alias Jamiec.Content
   alias Jamiec.Content.Post
+  alias Jamiec.Content.Tag
   alias Jamiec.Accounts.Scope
 
   import Jamiec.ContentFixtures
@@ -194,6 +195,103 @@ defmodule Jamiec.ContentTest do
       assert post.html_body =~ "<table>"
       assert post.html_body =~ "<del>"
       assert post.html_body =~ "strikethrough"
+    end
+  end
+
+  describe "create_tag/1" do
+    test "with valid data creates a tag" do
+      assert {:ok, %Tag{} = tag} = Content.create_tag(%{tag: "Elixir"})
+      assert tag.tag == "Elixir"
+    end
+
+    test "auto-generates slug from tag" do
+      assert {:ok, %Tag{} = tag} = Content.create_tag(%{tag: "Elixir Programming"})
+      assert tag.slug == "elixir-programming"
+    end
+
+    test "slugifies special characters" do
+      assert {:ok, %Tag{} = tag} = Content.create_tag(%{tag: "C++ & Rust!"})
+      assert tag.slug == "c-rust"
+    end
+
+    test "with missing tag returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Content.create_tag(%{})
+    end
+
+    test "enforces unique slug constraint" do
+      assert {:ok, %Tag{}} = Content.create_tag(%{tag: "Elixir"})
+      assert {:error, %Ecto.Changeset{} = changeset} = Content.create_tag(%{tag: "Elixir"})
+      assert "has already been taken" in errors_on(changeset).slug
+    end
+  end
+
+  describe "tags and posts relationship" do
+    test "a post can have many tags" do
+      post = post_fixture()
+      tag1 = tag_fixture(%{tag: "Elixir"})
+      tag2 = tag_fixture(%{tag: "Phoenix"})
+      tag3 = tag_fixture(%{tag: "Programming"})
+
+      Jamiec.Repo.insert_all("posts_tags", [
+        %{post_id: post.id, tag_id: tag1.id},
+        %{post_id: post.id, tag_id: tag2.id},
+        %{post_id: post.id, tag_id: tag3.id}
+      ])
+
+      post_with_tags = post |> Jamiec.Repo.preload(:tags)
+
+      assert length(post_with_tags.tags) == 3
+      assert tag1 in post_with_tags.tags
+      assert tag2 in post_with_tags.tags
+      assert tag3 in post_with_tags.tags
+    end
+
+    test "a tag can have many posts" do
+      tag = tag_fixture(%{tag: "Elixir"})
+      post1 = post_fixture(%{title: "Post 1"})
+      post2 = post_fixture(%{title: "Post 2"})
+      post3 = post_fixture(%{title: "Post 3"})
+
+      Jamiec.Repo.insert_all("posts_tags", [
+        %{post_id: post1.id, tag_id: tag.id},
+        %{post_id: post2.id, tag_id: tag.id},
+        %{post_id: post3.id, tag_id: tag.id}
+      ])
+
+      tag_with_posts = tag |> Jamiec.Repo.preload(:posts)
+
+      assert length(tag_with_posts.posts) == 3
+      assert post1 in tag_with_posts.posts
+      assert post2 in tag_with_posts.posts
+      assert post3 in tag_with_posts.posts
+    end
+
+    test "deleting a post removes its tag associations" do
+      post = post_fixture()
+      tag = tag_fixture(%{tag: "Elixir"})
+
+      Jamiec.Repo.insert_all("posts_tags", [
+        %{post_id: post.id, tag_id: tag.id}
+      ])
+
+      Content.delete_post(post)
+
+      tag_with_posts = tag |> Jamiec.Repo.preload(:posts)
+      assert tag_with_posts.posts == []
+    end
+
+    test "deleting a tag removes its post associations" do
+      post = post_fixture()
+      tag = tag_fixture(%{tag: "Elixir"})
+
+      Jamiec.Repo.insert_all("posts_tags", [
+        %{post_id: post.id, tag_id: tag.id}
+      ])
+
+      Content.delete_tag(tag)
+
+      post_with_tags = post |> Jamiec.Repo.preload(:tags)
+      assert post_with_tags.tags == []
     end
   end
 end

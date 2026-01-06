@@ -3,6 +3,8 @@ defmodule Jamiec.Content.Post do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Jamiec.Content.Tag
+
   @statuses [:draft, :published, :hidden]
 
   schema "posts" do
@@ -11,6 +13,8 @@ defmodule Jamiec.Content.Post do
     field :markdown_body, :string
     field :html_body, :string
     field :status, Ecto.Enum, values: @statuses, default: :draft
+
+    many_to_many :tags, Tag, join_through: "posts_tags"
 
     timestamps(type: :utc_datetime)
   end
@@ -39,7 +43,8 @@ defmodule Jamiec.Content.Post do
               tagfilter: true,
               table: true,
               autolink: true,
-              tasklist: true
+              tasklist: true,
+              header_ids: ""
             ],
             parse: [smart: true],
             render: [unsafe_: true]
