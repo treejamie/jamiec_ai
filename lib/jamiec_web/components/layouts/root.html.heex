@@ -30,8 +30,8 @@
       })();
     </script>
   </head>
-  <body>
-    <header class="navbar px-4 sm:px-6 lg:px-8">
+  <body class="min-h-screen flex flex-col">
+    <header :if={@current_scope} class="navbar px-4 sm:px-6 lg:px-8 bg-base-100 border-b border-base-300">
       <div class="flex-1">
         <a href="/" class="flex-1 flex w-fit items-center gap-2">
           <img src={~p"/images/logo.svg"} width="36" />
@@ -40,31 +40,31 @@
       </div>
 
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-        <%= if @current_scope do %>
-          <li>
-            {@current_scope.user.email}
-          </li>
+        <li>
+          {@current_scope.user.email}
+        </li>
 
-          <li>
-            <.link href={~p"/office/posts/new"}>New Post</.link>
-          </li>
-          <li>
-            <.link href={~p"/office/settings"}>Settings</.link>
-          </li>
-          <li>
-            <.link href={~p"/office/log-out"} method="delete">Log out</.link>
-          </li>
-        <% end %>
+        <li>
+          <.link href={~p"/office/posts/new"}>New Post</.link>
+        </li>
+        <li>
+          <.link href={~p"/office/settings"}>Settings</.link>
+        </li>
+        <li>
+          <.link href={~p"/office/log-out"} method="delete">Log out</.link>
+        </li>
         <li>
           <.theme_toggle />
         </li>
       </ul>
     </header>
 
-    {@inner_content}
+    <div class="flex-1">
+      {@inner_content}
+    </div>
 
-    <footer class="w-full bg-base-300 px-4 sm:px-6 lg:px-8 py-16 md:min-h-screen flex items-center">
-      <div class="max-w-4xl mx-auto w-full">
+    <footer class="w-full bg-[#292f37] px-4 sm:px-6 lg:px-16 py-16 md:min-h-screen flex items-center">
+      <div class="max-w-7xl mx-auto w-full">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
           <div class="shrink-0">
             <img
@@ -75,21 +75,16 @@
           </div>
 
           <div class="flex-1 text-center md:text-left">
-            <p class="text-base-content mb-4">
-              <span class="text-primary font-semibold">Jamie Curle</span>
-              <strong> is a privacy focused technology professional</strong> and
-              founder. Currently he's building at Privacy Posture leading the
-              design, development and deployment of privacy focused
-              engineering tools to make it easy for businesses to get their privacy posture
-              managed and maintained.
+            <p class="text-white mb-4">
+              <span class="font-bold">Jamie Curle</span>
+              {" "}is a <strong>privacy focused technology professional</strong>
+              {" "}and founder. Currently he's working at Privacy Posture leading the design, development and deployment of privacy focused engineering tools to market.
             </p>
-            <p class="text-base-content mb-4">
-              He's a qualified ISO27001 lead implementer and has held CTO and
-              CIO positions in an multi-award winning global startup.
+            <p class="text-white mb-4">
+              He's a qualified ISO27001 lead implementer and has held CTO and CIO positions in an multi-award winning global startup.
             </p>
-            <p class="text-base-content">
-              He spends his spare time working with trees, either in woodworking,
-              arboriculture or woodland management.
+            <p class="text-white">
+              He spend his spare time working with trees, either in woodworking, arboriculture or woodland management.
             </p>
           </div>
 
@@ -100,13 +95,13 @@
               rel="noopener noreferrer"
               class="block"
             >
-              <img src={~p"/images/linkedin.svg"} alt="LinkedIn" class="w-[100px] h-[100px] mb-8" />
+              <img src={~p"/images/linkedin.svg"} alt="LinkedIn" class="w-[100px] h-[100px]" />
             </a>
             <a
               href="https://github.com/treejamie"
               target="_blank"
               rel="noopener noreferrer"
-              class="block text-base-content"
+              class="block text-white"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
