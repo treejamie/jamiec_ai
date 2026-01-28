@@ -358,10 +358,11 @@ defmodule Jamiec.ContentTest do
       tag1 = tag_fixture(%{tag: "Elixir"})
       tag2 = tag_fixture(%{tag: "Phoenix"})
 
-      {:ok, post} = Content.create_post_with_tags(
-        %{title: "My Post"},
-        [tag1.id, tag2.id]
-      )
+      {:ok, post} =
+        Content.create_post_with_tags(
+          %{title: "My Post"},
+          [tag1.id, tag2.id]
+        )
 
       post_with_tags = post |> Jamiec.Repo.preload(:tags)
 
@@ -385,16 +386,18 @@ defmodule Jamiec.ContentTest do
       tag2 = tag_fixture(%{tag: "Phoenix"})
       tag3 = tag_fixture(%{tag: "OTP"})
 
-      {:ok, post} = Content.create_post_with_tags(
-        %{title: "Original"},
-        [tag1.id]
-      )
+      {:ok, post} =
+        Content.create_post_with_tags(
+          %{title: "Original"},
+          [tag1.id]
+        )
 
-      {:ok, updated} = Content.update_post_with_tags(
-        post,
-        %{title: "Updated"},
-        [tag2.id, tag3.id]
-      )
+      {:ok, updated} =
+        Content.update_post_with_tags(
+          post,
+          %{title: "Updated"},
+          [tag2.id, tag3.id]
+        )
 
       updated_with_tags = updated |> Jamiec.Repo.preload(:tags)
 
@@ -408,10 +411,11 @@ defmodule Jamiec.ContentTest do
     test "can remove all tags" do
       tag = tag_fixture(%{tag: "Elixir"})
 
-      {:ok, post} = Content.create_post_with_tags(
-        %{title: "Has Tags"},
-        [tag.id]
-      )
+      {:ok, post} =
+        Content.create_post_with_tags(
+          %{title: "Has Tags"},
+          [tag.id]
+        )
 
       {:ok, updated} = Content.update_post_with_tags(post, %{}, [])
 
