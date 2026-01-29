@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+.github
+
+# CI/CD
+.gitlab-ci.yml
+
+# Build artifacts
+_build
+deps
+*.ez
+
+# Test files
+test
+.credo.exs
+.formatter.exs
+
+# Documentation
+*.md
+AGENTS.md
+README.md
+CHANGELOG.md
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local env files
+.env
+.env.local
+.env*.local
+
+# Logs
+*.log
+logs
+
+# Development database
+*.db
+*.db-*
+
+# Node modules (if any)
+node_modules
+
+# Temp files
+tmp
+temp
