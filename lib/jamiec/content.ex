@@ -37,7 +37,11 @@ defmodule Jamiec.Content do
 
   Raises `Ecto.NoResultsError` if the Post does not exist.
   """
-  def get_post!(id), do: Repo.get!(Post, id)
+  def get_post!(id) do
+    Post
+    |> Repo.get!(id)
+    |> Repo.preload(:tags)
+  end
 
   @doc """
   Creates a post.

@@ -21,7 +21,7 @@ defmodule Jamiec.ContentFixtures do
       |> valid_post_attributes()
       |> Content.create_post()
 
-    post
+    Jamiec.Repo.preload(post, :tags)
   end
 
   def valid_tag_attributes(attrs \\ %{}) do

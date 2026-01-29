@@ -66,6 +66,9 @@ defmodule JamiecWeb.HomeLive do
                     {post.title}
                   </h3>
                 </.link>
+                <p :if={post.description} class="text-lg text-[#f5f5f5] opacity-75 mt-2">
+                  {post.description}
+                </p>
                 <div class="flex items-center gap-4 flex-wrap">
                   <p class="text-sm text-[#f5f5f5]">
                     {Calendar.strftime(post.inserted_at, "%d %B %Y")}
