@@ -21,6 +21,7 @@ defmodule Jamiec.Content do
     Post
     |> order_by(desc: :inserted_at, desc: :id)
     |> Repo.all()
+    |> Repo.preload(:tags)
   end
 
   def list_posts(_scope) do
@@ -28,6 +29,7 @@ defmodule Jamiec.Content do
     |> where(status: :published)
     |> order_by(desc: :inserted_at, desc: :id)
     |> Repo.all()
+    |> Repo.preload(:tags)
   end
 
   @doc """
@@ -35,7 +37,11 @@ defmodule Jamiec.Content do
 
   Raises `Ecto.NoResultsError` if the Post does not exist.
   """
-  def get_post!(id), do: Repo.get!(Post, id)
+  def get_post!(id) do
+    Post
+    |> Repo.get!(id)
+    |> Repo.preload(:tags)
+  end
 
   @doc """
   Creates a post.

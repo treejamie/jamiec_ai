@@ -238,7 +238,7 @@ defmodule Jamiec.ContentTest do
         %{post_id: post.id, tag_id: tag3.id}
       ])
 
-      post_with_tags = post |> Jamiec.Repo.preload(:tags)
+      post_with_tags = Content.get_post!(post.id)
 
       assert length(post_with_tags.tags) == 3
       assert tag1 in post_with_tags.tags
@@ -258,12 +258,12 @@ defmodule Jamiec.ContentTest do
         %{post_id: post3.id, tag_id: tag.id}
       ])
 
-      tag_with_posts = tag |> Jamiec.Repo.preload(:posts)
+      tag_with_posts = tag |> Jamiec.Repo.preload(:posts, force: true)
 
       assert length(tag_with_posts.posts) == 3
-      assert post1 in tag_with_posts.posts
-      assert post2 in tag_with_posts.posts
-      assert post3 in tag_with_posts.posts
+      assert Enum.any?(tag_with_posts.posts, fn p -> p.id == post1.id end)
+      assert Enum.any?(tag_with_posts.posts, fn p -> p.id == post2.id end)
+      assert Enum.any?(tag_with_posts.posts, fn p -> p.id == post3.id end)
     end
 
     test "deleting a post removes its tag associations" do
