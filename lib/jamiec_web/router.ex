@@ -26,10 +26,12 @@ defmodule JamiecWeb.Router do
     end
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", JamiecWeb do
-  #   pipe_through :api
-  # end
+  # Health check endpoint for Coolify and monitoring
+  scope "/", JamiecWeb do
+    pipe_through :api
+
+    get "/health", HealthController, :index
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:jamiec, :dev_routes) do
