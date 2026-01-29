@@ -36,14 +36,19 @@ ENV MIX_ENV="prod"
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
-RUN mix deps.get --only $MIX_ENV
+RUN --mount=type=cache,target=/root/.hex \
+    --mount=type=cache,target=/root/.mix \
+    --mount=type=cache,target=deps,sharing=locked \
+    mix deps.get --only $MIX_ENV
 RUN mkdir config
 
 # copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
-RUN mix deps.compile
+RUN --mount=type=cache,target=deps,sharing=locked \
+    --mount=type=cache,target=_build,sharing=locked \
+    mix deps.compile
 
 COPY priv priv
 
@@ -52,16 +57,23 @@ COPY lib lib
 COPY assets assets
 
 # compile assets
-RUN mix assets.deploy
+RUN --mount=type=cache,target=deps,sharing=locked \
+    --mount=type=cache,target=_build,sharing=locked \
+    mix assets.deploy
 
 # Compile the release
-RUN mix compile
+RUN --mount=type=cache,target=deps,sharing=locked \
+    --mount=type=cache,target=_build,sharing=locked \
+    mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
 COPY rel rel
-RUN mix release
+RUN --mount=type=cache,target=deps,sharing=locked \
+    --mount=type=cache,target=_build,sharing=locked \
+    mix release && \
+    cp -r _build/${MIX_ENV}/rel/jamiec /app/release
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -85,7 +97,7 @@ RUN chown nobody /app
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/jamiec ./
+COPY --from=builder --chown=nobody:root /app/release ./
 
 USER nobody
 
