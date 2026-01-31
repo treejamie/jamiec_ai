@@ -26,7 +26,7 @@ config :jamiec,
 
 # Configures the endpoint
 config :jamiec, JamiecWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "stekpi.jamiecurle.com"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: JamiecWeb.ErrorHTML, json: JamiecWeb.ErrorJSON],
