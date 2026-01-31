@@ -38,7 +38,6 @@ ENV MIX_ENV="prod"
 COPY mix.exs mix.lock ./
 RUN --mount=type=cache,target=/root/.hex \
     --mount=type=cache,target=/root/.mix \
-    --mount=type=cache,target=deps,sharing=locked \
     mix deps.get --only $MIX_ENV
 RUN mkdir config
 
@@ -46,8 +45,7 @@ RUN mkdir config
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
-RUN --mount=type=cache,target=deps,sharing=locked \
-    --mount=type=cache,target=_build,sharing=locked \
+RUN --mount=type=cache,target=_build,sharing=locked \
     mix deps.compile
 
 COPY priv priv
@@ -57,21 +55,18 @@ COPY lib lib
 COPY assets assets
 
 # compile assets
-RUN --mount=type=cache,target=deps,sharing=locked \
-    --mount=type=cache,target=_build,sharing=locked \
+RUN --mount=type=cache,target=_build,sharing=locked \
     mix assets.deploy
 
 # Compile the release
-RUN --mount=type=cache,target=deps,sharing=locked \
-    --mount=type=cache,target=_build,sharing=locked \
+RUN --mount=type=cache,target=_build,sharing=locked \
     mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
 COPY rel rel
-RUN --mount=type=cache,target=deps,sharing=locked \
-    --mount=type=cache,target=_build,sharing=locked \
+RUN --mount=type=cache,target=_build,sharing=locked \
     mix release && \
     cp -r _build/${MIX_ENV}/rel/jamiec /app/release
 
