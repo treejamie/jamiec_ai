@@ -1,0 +1,53 @@
+services:
+  web:
+    image: ghcr.io/treejamie/jamiec:latest
+    pull_policy: always
+    ports:
+      - "4000:4000"
+    environment:
+      # Required environment variables
+      PHX_SERVER: "true"
+      DATABASE_URL: ${DATABASE_URL:-ecto://postgres:postgres@host.docker.internal:5432/jamiec_dev}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-Lv0w0wb2y/Pl48w2QZwl1/Uqooosvuc85FpPs3bX2QMO9aZoeF+QYTg0pENw91PL}
+
+      # Optional environment variables
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PORT: ${PORT:-4000}
+      POOL_SIZE: ${POOL_SIZE:-10}
+
+      # Uncomment if you need IPv6
+      # ECTO_IPV6: "false"
+
+      # Uncomment for DNS cluster support
+      # DNS_CLUSTER_QUERY: ""
+
+    # Health check matching the Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
+
+    # Restart policy
+    restart: unless-stopped
+
+    networks:
+      - jamiec
+
+  cloudflared:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared:latest
+    pull_policy: always
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --url http://web:4000
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
+    networks:
+      - jamiec
+
+networks:
+  jamiec:
+    driver: bridge
