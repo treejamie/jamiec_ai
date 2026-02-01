@@ -18,7 +18,7 @@ defmodule JamiecWeb.HomeLive do
                 Jamie Curle
               </h1>
               <p class="text-2xl md:text-4xl text-[#989797] max-w-2xl leading-relaxed">
-                Lead Software Engineer specialising in Elixir, privacy engineering, and security-first systems. Part-time arborist and aspiring woodsman.
+                Technical Leader / Engineer specialising in Elixir, privacy engineering, and security-first systems. Part-time arborist and aspiring woodsman.
               </p>
             </div>
             <div class="flex gap-6 shrink-0">
